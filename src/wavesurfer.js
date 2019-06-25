@@ -2,6 +2,7 @@ import * as util from './util';
 import MultiCanvas from './drawer.multicanvas';
 import WebAudio from './webaudio';
 import MediaElement from './mediaelement';
+import ExternalBackend from './external-backend';
 import PeakCache from './peakcache';
 
 /*
@@ -26,7 +27,7 @@ import PeakCache from './peakcache';
  * initialized ScriptProcessorNode or leave blank.
  * @property {boolean} autoCenter=true If a scrollbar is present, center the
  * waveform around the progress
- * @property {string} backend='WebAudio' `'WebAudio'|'MediaElement'` In most cases
+ * @property {string} backend='WebAudio' `'WebAudio'|'MediaElement'|'ExternalBackend'` In most cases
  * you don't have to set this manually. MediaElement is a fallback for
  * unsupported browsers.
  * @property {string} backgroundColor=null Change background color of the
@@ -227,7 +228,8 @@ export default class WaveSurfer extends util.Observer {
     /** @private */
     backends = {
         MediaElement,
-        WebAudio
+        WebAudio,
+        ExternalBackend
     };
 
     /**
@@ -1268,6 +1270,11 @@ export default class WaveSurfer extends util.Observer {
                 return this.loadBuffer(url, peaks, duration);
             case 'MediaElement':
                 return this.loadMediaElement(url, peaks, preload, duration);
+            case 'ExternalBackend':
+                this.backend.load(peaks, duration);
+                this.drawBuffer();
+                this.fireEvent('ready');
+                return;
         }
     }
 
